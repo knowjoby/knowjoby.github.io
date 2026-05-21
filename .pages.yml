@@ -1,3 +1,7 @@
+media:
+  input: assets/images/uploads
+  output: /assets/images/uploads
+
 content:
   - name: posts
     label: Posts
