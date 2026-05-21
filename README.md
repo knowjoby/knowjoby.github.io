@@ -27,34 +27,37 @@ Branch: `main` / `/ (root)` → Save.
 
 After ~1 minute the site is live at **https://knowjoby.github.io**.
 
-### 3. Stand up the OAuth proxy (so the /admin login works)
+### 3. OAuth proxy (how /admin login works)
 
-Decap needs a tiny OAuth handler. The free way is Netlify:
+Decap CMS's GitHub backend needs an OAuth proxy. We use **Netlify's hosted
+endpoint** at `https://api.netlify.com/auth` — no server code to deploy.
 
-1. Go to https://app.netlify.com → **Add new site → Import from Git** → pick **any**
-   placeholder repo (you can fork `decaporg/decap-cms` or use an empty repo).
-   The site doesn't host anything — it only handles login.
-2. In **Site settings → Identity** — skip; we don't use Netlify Identity.
-3. In **Site settings → Access & security → OAuth → Install provider** →
-   choose **GitHub** → paste the **Client ID** and **Client Secret** from a
-   GitHub OAuth app you create here:
-   - https://github.com/settings/developers → **New OAuth App**
-   - Homepage URL: `https://knowjoby.github.io`
-   - Authorization callback URL: `https://<your-netlify-subdomain>.netlify.app/.netlify/identity/callback`
-     (Netlify shows the exact URL in the OAuth setup screen — use that one.)
-4. Note your Netlify subdomain — e.g. `knowjoby-blog-auth.netlify.app`.
+Current setup:
+- Netlify project `knowjoby-blog-auth` holds the GitHub OAuth provider
+  (Site settings → Access & security → OAuth → Install provider → GitHub).
+- GitHub OAuth App (`Ov23liDN9uKWS28woYwW`) callback URL is
+  `https://api.netlify.com/auth/done`.
+- `admin/config.yml` sets `base_url: https://api.netlify.com`,
+  `auth_endpoint: auth`, `site_id: knowjoby-blog-auth.netlify.app`.
+  The `site_id` is **load-bearing** — it tells Netlify which project's OAuth
+  provider to use. Without it, Decap defaults to `knowjoby.github.io` and
+  Netlify returns 404.
 
-### 4. Wire the proxy into the CMS
+**To rotate the GitHub OAuth secret:**
+1. GitHub → Settings → Developer settings → OAuth Apps → pick the app →
+   **Generate a new client secret**, copy it.
+2. Netlify → `knowjoby-blog-auth` site → Access & security → OAuth →
+   GitHub provider → **Edit** → paste new secret → Save.
+3. Revoke the old secret on GitHub. No code change needed.
 
-Edit `admin/config.yml` and replace:
+**If you ever move off Netlify:** stand up any OAuth proxy that speaks
+Decap's protocol (e.g. self-hosted Netlify Function from
+`decaporg/decap-cms` examples, or a Cloudflare Worker like
+`sterlingwes/decap-proxy`). Then in `admin/config.yml` set `base_url` to
+the new origin, drop or repurpose `site_id`, and update the GitHub OAuth
+App's callback URL to the new proxy's `/auth/done` (or equivalent).
 
-```yaml
-base_url: https://REPLACE-ME.netlify.app
-```
-
-with your real Netlify subdomain, then commit and push.
-
-### 5. Use it
+### 4. Use it
 
 Go to **https://knowjoby.github.io/admin/** → click **Login with GitHub** →
 authorize → you land in the Decap editor. New post → write → **Publish**.

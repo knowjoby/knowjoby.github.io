@@ -5,10 +5,15 @@ backend:
   name: github
   repo: knowjoby/knowjoby.github.io
   branch: main
-  # Points at your Netlify OAuth proxy site.
-  # Replace AFTER you create the Netlify site (see README "OAuth proxy" section).
+  # OAuth proxy: Netlify's hosted endpoint.
+  # base_url + auth_endpoint -> https://api.netlify.com/auth
+  # site_id MUST be the Netlify project hosting the GitHub OAuth provider
+  # (knowjoby-blog-auth). Without it, Decap defaults to location.hostname
+  # (= knowjoby.github.io) and Netlify returns 404 because no project matches.
+  # See: packages/decap-cms-lib-auth/src/netlify-auth.js (getSiteID + URL build).
   base_url: https://api.netlify.com
   auth_endpoint: auth
+  site_id: knowjoby-blog-auth.netlify.app
 
 # Where uploaded images go
 media_folder: "assets/images"
