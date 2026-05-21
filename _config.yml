@@ -1,0 +1,64 @@
+remote_theme: "mmistakes/minimal-mistakes@4.26.2"
+minimal_mistakes_skin: "default" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
+
+title: "Joby John"
+name: "Joby John"
+description: "Notes, essays, and updates."
+url: "https://knowjoby.github.io"
+baseurl: ""
+repository: "knowjoby/knowjoby.github.io"
+
+locale: "en-US"
+timezone: Asia/Kolkata
+
+search: true
+
+# Author block shown in the sidebar
+author:
+  name: "Joby John"
+  bio: "Builder of ACTI. Writing on impermanence, simulations, and code."
+  location: "India"
+  links:
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/knowjoby"
+
+# Default front-matter for posts
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      author_profile: true
+      read_time: true
+      comments: false
+      share: true
+      related: true
+      show_date: true
+
+# Pagination
+paginate: 10
+paginate_path: /page:num/
+
+# Markdown / build
+markdown: kramdown
+highlighter: rouge
+permalink: /:year/:month/:day/:title/
+
+# Plugins (whitelist for GitHub Pages safe build)
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-gist
+  - jekyll-feed
+  - jekyll-include-cache
+  - jekyll-remote-theme
+
+# Don't ship these to the build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - node_modules
+  - README.md

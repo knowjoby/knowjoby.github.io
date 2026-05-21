@@ -1,0 +1,53 @@
+# Decap CMS configuration
+# Docs: https://decapcms.org/docs/
+
+backend:
+  name: github
+  repo: knowjoby/knowjoby.github.io
+  branch: main
+  # Points at your Netlify OAuth proxy site.
+  # Replace AFTER you create the Netlify site (see README "OAuth proxy" section).
+  base_url: https://REPLACE-ME.netlify.app
+  auth_endpoint: auth
+
+# Where uploaded images go
+media_folder: "assets/images"
+public_folder: "/assets/images"
+
+# Show a preview link in the editor
+site_url: https://knowjoby.github.io
+display_url: https://knowjoby.github.io
+
+# Enable drafts -> editorial workflow (creates PRs instead of direct commits)
+publish_mode: editorial_workflow
+
+collections:
+  - name: "posts"
+    label: "Blog posts"
+    folder: "_posts"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    fields:
+      - { label: "Title",      name: "title",      widget: "string" }
+      - { label: "Publish date", name: "date",     widget: "datetime" }
+      - { label: "Categories", name: "categories", widget: "list", required: false }
+      - { label: "Tags",       name: "tags",       widget: "list", required: false }
+      - { label: "Excerpt",    name: "excerpt",    widget: "text", required: false }
+      - { label: "Header image", name: "header",   widget: "object", required: false, fields: [
+          { label: "Image", name: "image", widget: "image", required: false }
+        ]}
+      - { label: "Body",       name: "body",       widget: "markdown" }
+
+  - name: "pages"
+    label: "Pages"
+    files:
+      - label: "About"
+        name: "about"
+        file: "about.md"
+        fields:
+          - { label: "Title",     name: "title",     widget: "string" }
+          - { label: "Permalink", name: "permalink", widget: "string", default: "/about/" }
+          - { label: "Layout",    name: "layout",    widget: "hidden", default: "single" }
+          - { label: "Body",      name: "body",      widget: "markdown" }
