@@ -28,3 +28,16 @@ content:
       - name: body
         label: Content
         type: rich-text
+        options:
+          toolbar:
+            - bold
+            - italic
+            - strikethrough
+            - heading
+            - link
+            - image
+            - bulletList
+            - orderedList
+            - blockquote
+            - code
+            - codeBlock
