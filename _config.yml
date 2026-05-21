@@ -11,7 +11,7 @@ repository: "knowjoby/knowjoby.github.io"
 locale: "en-US"
 timezone: Asia/Kolkata
 
-search: true
+search: false
 
 # Author block shown in the sidebar
 author:
@@ -30,11 +30,11 @@ defaults:
       type: posts
     values:
       layout: single
-      author_profile: true
-      read_time: true
+      author_profile: false
+      read_time: false
       comments: false
-      share: true
-      related: true
+      share: false
+      related: false
       show_date: true
 
 # Pagination
