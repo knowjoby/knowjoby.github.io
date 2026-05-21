@@ -1,88 +1,46 @@
 # knowjoby.github.io
 
-Personal blog. Jekyll (Minimal Mistakes theme) on GitHub Pages, with Decap CMS
-for a GitHub-authenticated admin UI at `/admin/`.
+Personal blog. Jekyll (Minimal Mistakes theme) on GitHub Pages, with a custom
+single-page admin at `/admin/` that posts directly to GitHub via the Contents API.
+
+No Netlify, no Decap, no OAuth proxy. The admin is a pure static page that
+holds a GitHub Personal Access Token in `localStorage` and uses it to commit
+new posts.
 
 ---
 
-## How to ship this — one-time setup
+## /admin/ — one-time setup
 
-### 1. Push to GitHub
+1. Open **https://knowjoby.github.io/admin/**.
+2. The setup view links to GitHub → **Settings → Developer settings →
+   Personal access tokens → Fine-grained tokens → Generate new token**.
+3. Create the token with:
+   - **Repository access:** Only select repositories → `knowjoby/knowjoby.github.io`
+   - **Repository permissions:** Contents → **Read and write**
+   - (No other permissions needed.)
+4. Paste the token (`github_pat_…`) into the admin and click **Save & sign in**.
 
-```bash
-cd ~/blog-knowjoby.github.io
-git init
-git add .
-git commit -m "Initial blog scaffold"
-git branch -M main
-gh repo create knowjoby/knowjoby.github.io --public --source=. --push
-```
+The token is stored only in your browser's `localStorage` for this origin.
+Sign out (or clear site data) to remove it. To rotate: revoke the token at
+GitHub, generate a new one, paste again.
 
-(Or create the repo `knowjoby.github.io` in the GitHub UI and `git push` to it.)
+## Writing posts
 
-### 2. Turn on GitHub Pages
+- **Via /admin/**: + New post → fill title, date, body in Markdown → Publish.
+  Commits `_posts/YYYY-MM-DD-slug.md` to `main`, GitHub Pages rebuilds in ~1 min.
+- **Via git directly**: drop a file in `_posts/` named `YYYY-MM-DD-slug.md`:
 
-GitHub repo → **Settings → Pages** → Source: **Deploy from a branch** →
-Branch: `main` / `/ (root)` → Save.
+  ```yaml
+  ---
+  title: "Your title"
+  date: 2026-05-21
+  tags: [notes]
+  ---
 
-After ~1 minute the site is live at **https://knowjoby.github.io**.
+  Body in Markdown.
+  ```
 
-### 3. OAuth proxy (how /admin login works)
-
-Decap CMS's GitHub backend needs an OAuth proxy. We use **Netlify's hosted
-endpoint** at `https://api.netlify.com/auth` — no server code to deploy.
-
-Current setup:
-- Netlify project `knowjoby-blog-auth` holds the GitHub OAuth provider
-  (Site settings → Access & security → OAuth → Install provider → GitHub).
-- GitHub OAuth App (`Ov23liDN9uKWS28woYwW`) callback URL is
-  `https://api.netlify.com/auth/done`.
-- `admin/config.yml` sets `base_url: https://api.netlify.com`,
-  `auth_endpoint: auth`, `site_id: knowjoby-blog-auth.netlify.app`.
-  The `site_id` is **load-bearing** — it tells Netlify which project's OAuth
-  provider to use. Without it, Decap defaults to `knowjoby.github.io` and
-  Netlify returns 404.
-
-**To rotate the GitHub OAuth secret:**
-1. GitHub → Settings → Developer settings → OAuth Apps → pick the app →
-   **Generate a new client secret**, copy it.
-2. Netlify → `knowjoby-blog-auth` site → Access & security → OAuth →
-   GitHub provider → **Edit** → paste new secret → Save.
-3. Revoke the old secret on GitHub. No code change needed.
-
-**If you ever move off Netlify:** stand up any OAuth proxy that speaks
-Decap's protocol (e.g. self-hosted Netlify Function from
-`decaporg/decap-cms` examples, or a Cloudflare Worker like
-`sterlingwes/decap-proxy`). Then in `admin/config.yml` set `base_url` to
-the new origin, drop or repurpose `site_id`, and update the GitHub OAuth
-App's callback URL to the new proxy's `/auth/done` (or equivalent).
-
-### 4. Use it
-
-Go to **https://knowjoby.github.io/admin/** → click **Login with GitHub** →
-authorize → you land in the Decap editor. New post → write → **Publish**.
-Decap commits a Markdown file into `_posts/`, GitHub Pages rebuilds, post is live.
-
----
-
-## Writing posts without the CMS
-
-Just drop a file into `_posts/` named `YYYY-MM-DD-slug.md` with this front-matter:
-
-```yaml
----
-title: "Your title"
-date: 2026-05-21
-categories: [notes]
-tags: [whatever]
----
-
-Body in Markdown.
-```
-
-`git push` and it's live.
-
----
+  Then `git push`.
 
 ## Running locally (optional)
 
@@ -91,3 +49,8 @@ bundle install
 bundle exec jekyll serve
 # → http://127.0.0.1:4000
 ```
+
+## Bootstrap (already done — kept for reference)
+
+The repo was created and pushed via the GitHub UI + SSH. GitHub Pages is
+configured under **Settings → Pages → Deploy from a branch → main /(root)**.

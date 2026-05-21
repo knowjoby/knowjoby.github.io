@@ -1,12 +1,452 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Content Manager</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>knowjoby — admin</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #161a22;
+    --panel-2: #1d222c;
+    --border: #2a3140;
+    --text: #e6e8ee;
+    --muted: #8b93a7;
+    --accent: #6ea8ff;
+    --accent-2: #4d8bff;
+    --danger: #ff6b6b;
+    --good: #5dd39e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  header h1 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: 0.2px; }
+  header .who { color: var(--muted); font-size: 13px; }
+  main { max-width: 900px; margin: 0 auto; padding: 24px; }
+  button, .btn {
+    background: var(--accent); color: #04111f; border: 0; padding: 8px 14px;
+    border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;
+  }
+  button:hover { background: var(--accent-2); color: #fff; }
+  button.ghost {
+    background: transparent; color: var(--text); border: 1px solid var(--border);
+  }
+  button.ghost:hover { background: var(--panel-2); }
+  button.danger { background: var(--danger); color: #fff; }
+  input, textarea, select {
+    width: 100%; background: var(--panel); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px;
+    font: inherit;
+  }
+  textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; resize: vertical; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 6px; }
+  .row { display: flex; gap: 12px; }
+  .row > * { flex: 1; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; margin-bottom: 16px;
+  }
+  .post-list { list-style: none; padding: 0; margin: 0; }
+  .post-list li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px;
+    margin-bottom: 8px; background: var(--panel-2);
+  }
+  .post-list .meta { color: var(--muted); font-size: 13px; }
+  .toolbar { display: flex; gap: 8px; align-items: center; margin: 16px 0; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+  .preview {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px 16px; min-height: 300px; max-height: 60vh; overflow: auto;
+  }
+  .preview h1, .preview h2, .preview h3 { margin-top: 0.6em; }
+  .preview pre { background: #0a0d12; padding: 12px; border-radius: 6px; overflow: auto; }
+  .preview code { background: #0a0d12; padding: 2px 5px; border-radius: 3px; font-size: 13px; }
+  .status { padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+  .status.ok { background: rgba(93,211,158,0.12); color: var(--good); border: 1px solid rgba(93,211,158,0.3); }
+  .status.err { background: rgba(255,107,107,0.12); color: var(--danger); border: 1px solid rgba(255,107,107,0.3); }
+  a { color: var(--accent); }
+  code.kbd {
+    background: var(--panel-2); padding: 2px 6px; border-radius: 4px;
+    font-family: ui-monospace, monospace; font-size: 13px;
+  }
+  .hidden { display: none !important; }
+</style>
 </head>
 <body>
-  <!-- Decap CMS — admin UI for the blog. Login uses GitHub OAuth. -->
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
+<header>
+  <h1>knowjoby blog · admin</h1>
+  <div class="who">
+    <span id="whoami" class="muted"></span>
+    <button id="logout" class="ghost hidden" style="margin-left:12px">Logout</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- Setup view (first time) -->
+  <section id="setup-view" class="hidden">
+    <div class="card">
+      <h2 style="margin-top:0">First-time setup</h2>
+      <p>This admin commits posts directly to your GitHub repo using a Personal Access Token. The token lives only in this browser (<code>localStorage</code>), never on a server.</p>
+      <ol>
+        <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → Fine-grained tokens → New</a>.</li>
+        <li><b>Token name:</b> <code class="kbd">knowjoby blog admin</code></li>
+        <li><b>Expiration:</b> pick what you like (e.g. 90 days).</li>
+        <li><b>Repository access:</b> "Only select repositories" → pick <code class="kbd">knowjoby/knowjoby.github.io</code>.</li>
+        <li><b>Repository permissions:</b> set <b>Contents</b> to <b>Read and write</b>. (That's the only permission you need.)</li>
+        <li>Generate the token, copy it (starts with <code>github_pat_…</code>), and paste below.</li>
+      </ol>
+      <label for="token-input">Paste token</label>
+      <input id="token-input" type="password" placeholder="github_pat_… or ghp_…" autocomplete="off" spellcheck="false" />
+      <div class="toolbar">
+        <button id="token-save">Save &amp; sign in</button>
+        <span id="setup-status" class="muted" style="font-size:13px"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main app view -->
+  <section id="app-view" class="hidden">
+
+    <div id="status-area"></div>
+
+    <div class="toolbar">
+      <button id="new-post">+ New post</button>
+      <button id="refresh-list" class="ghost">Refresh</button>
+    </div>
+
+    <div id="list-view">
+      <h2>Recent posts</h2>
+      <ul id="post-list" class="post-list"><li class="muted">Loading…</li></ul>
+    </div>
+
+    <div id="edit-view" class="hidden">
+      <div class="card">
+        <div class="row">
+          <div>
+            <label for="title">Title</label>
+            <input id="title" placeholder="Your post title" />
+          </div>
+          <div>
+            <label for="date">Date</label>
+            <input id="date" type="date" />
+          </div>
+        </div>
+        <label for="tags">Tags (comma-separated, optional)</label>
+        <input id="tags" placeholder="notes, build-log" />
+
+        <div class="grid-2" style="margin-top: 12px">
+          <div>
+            <label for="body">Body (Markdown)</label>
+            <textarea id="body" rows="18" placeholder="Write in Markdown…"></textarea>
+          </div>
+          <div>
+            <label>Preview</label>
+            <div id="preview" class="preview"><em class="muted">Type something to see a preview.</em></div>
+          </div>
+        </div>
+
+        <div class="toolbar" style="margin-top: 16px">
+          <button id="publish">Publish</button>
+          <button id="save-draft" class="ghost">Save draft (local)</button>
+          <button id="cancel" class="ghost">Cancel</button>
+          <span id="edit-status" class="muted" style="font-size:13px; margin-left:auto"></span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<!-- Markdown renderer -->
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script>
+(() => {
+  const OWNER = 'knowjoby';
+  const REPO  = 'knowjoby.github.io';
+  const BRANCH = 'main';
+  const TOKEN_KEY = 'kjb_admin_token';
+  const DRAFT_KEY = 'kjb_admin_draft';
+
+  // --- helpers ---
+  const $ = (id) => document.getElementById(id);
+  const show = (el) => el.classList.remove('hidden');
+  const hide = (el) => el.classList.add('hidden');
+
+  function setStatus(msg, kind) {
+    const area = $('status-area');
+    area.innerHTML = '';
+    if (!msg) return;
+    const div = document.createElement('div');
+    div.className = 'status ' + (kind || 'ok');
+    div.textContent = msg;
+    area.appendChild(div);
+    if (kind !== 'err') setTimeout(() => { if (area.contains(div)) area.removeChild(div); }, 4000);
+  }
+
+  const getToken = () => localStorage.getItem(TOKEN_KEY) || '';
+  const setToken = (t) => localStorage.setItem(TOKEN_KEY, t);
+  const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+
+  // --- GitHub API ---
+  async function gh(path, opts = {}) {
+    const res = await fetch('https://api.github.com' + path, {
+      ...opts,
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Authorization': 'Bearer ' + getToken(),
+        ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(opts.headers || {}),
+      },
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`GitHub ${res.status}: ${body.slice(0, 200)}`);
+    }
+    return res.status === 204 ? null : res.json();
+  }
+
+  async function fetchUser() {
+    return gh('/user');
+  }
+
+  async function listPosts() {
+    try {
+      const items = await gh(`/repos/${OWNER}/${REPO}/contents/_posts?ref=${BRANCH}`);
+      return items
+        .filter((f) => f.type === 'file' && f.name.endsWith('.md'))
+        .sort((a, b) => b.name.localeCompare(a.name));
+    } catch (e) {
+      // 404 means _posts/ doesn't exist yet
+      if (String(e).includes('404')) return [];
+      throw e;
+    }
+  }
+
+  function utf8ToBase64(str) {
+    return btoa(String.fromCharCode(...new TextEncoder().encode(str)));
+  }
+
+  function slugify(s) {
+    return s.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 80);
+  }
+
+  async function publishPost({ title, date, tags, body }) {
+    const slug = slugify(title) || 'untitled';
+    const filename = `${date}-${slug}.md`;
+    const path = `_posts/${filename}`;
+    const frontmatter = [
+      '---',
+      `title: ${JSON.stringify(title)}`,
+      `date: ${date}`,
+      tags ? `tags: [${tags.split(',').map((t) => JSON.stringify(t.trim())).filter(Boolean).join(', ')}]` : null,
+      '---',
+      '',
+    ].filter(Boolean).join('\n');
+    const content = frontmatter + body + (body.endsWith('\n') ? '' : '\n');
+
+    return gh(`/repos/${OWNER}/${REPO}/contents/${path}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        message: `New post: ${title}`,
+        content: utf8ToBase64(content),
+        branch: BRANCH,
+      }),
+    });
+  }
+
+  // --- UI ---
+
+  function renderPostList(items) {
+    const ul = $('post-list');
+    ul.innerHTML = '';
+    if (!items.length) {
+      ul.innerHTML = '<li class="muted">No posts yet. Click "+ New post" to write your first one.</li>';
+      return;
+    }
+    for (const it of items) {
+      const li = document.createElement('li');
+      const left = document.createElement('div');
+      // Filename pattern: YYYY-MM-DD-slug.md
+      const m = it.name.match(/^(\d{4}-\d{2}-\d{2})-(.+)\.md$/);
+      const date = m ? m[1] : '';
+      const slug = m ? m[2] : it.name.replace(/\.md$/, '');
+      left.innerHTML = `<div style="font-weight:600">${slug.replace(/-/g, ' ')}</div><div class="meta">${date}</div>`;
+      const right = document.createElement('div');
+      const view = document.createElement('a');
+      view.href = `https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/_posts/${it.name}`;
+      view.target = '_blank';
+      view.rel = 'noopener';
+      view.className = 'btn ghost';
+      view.style.textDecoration = 'none';
+      view.textContent = 'View on GitHub';
+      right.appendChild(view);
+      li.appendChild(left);
+      li.appendChild(right);
+      ul.appendChild(li);
+    }
+  }
+
+  function updatePreview() {
+    const text = $('body').value;
+    const html = window.marked ? window.marked.parse(text || '') : text;
+    $('preview').innerHTML = html || '<em class="muted">Type something to see a preview.</em>';
+    saveDraft();
+  }
+
+  function saveDraft() {
+    const draft = {
+      title: $('title').value,
+      date: $('date').value,
+      tags: $('tags').value,
+      body: $('body').value,
+    };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  }
+
+  function loadDraft() {
+    try {
+      const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+      if (d.title) $('title').value = d.title;
+      if (d.date) $('date').value = d.date;
+      if (d.tags) $('tags').value = d.tags;
+      if (d.body) $('body').value = d.body;
+      updatePreview();
+    } catch {}
+  }
+
+  function clearDraft() {
+    localStorage.removeItem(DRAFT_KEY);
+  }
+
+  function todayISO() {
+    const d = new Date();
+    const z = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`;
+  }
+
+  function openEditor() {
+    hide($('list-view'));
+    show($('edit-view'));
+    if (!$('date').value) $('date').value = todayISO();
+    loadDraft();
+    $('title').focus();
+  }
+
+  function closeEditor() {
+    show($('list-view'));
+    hide($('edit-view'));
+  }
+
+  async function refreshPosts() {
+    try {
+      const posts = await listPosts();
+      renderPostList(posts);
+    } catch (e) {
+      setStatus(String(e), 'err');
+    }
+  }
+
+  // --- Auth bootstrap ---
+  async function start() {
+    const token = getToken();
+    if (!token) {
+      show($('setup-view'));
+      hide($('app-view'));
+      return;
+    }
+    try {
+      const user = await fetchUser();
+      $('whoami').textContent = `signed in as ${user.login}`;
+      show($('logout'));
+      hide($('setup-view'));
+      show($('app-view'));
+      refreshPosts();
+    } catch (e) {
+      // Bad token — go back to setup
+      clearToken();
+      $('setup-status').textContent = 'That token didn\'t work. Please try again.';
+      $('setup-status').className = 'status err';
+      show($('setup-view'));
+      hide($('app-view'));
+    }
+  }
+
+  // --- Event wiring ---
+  $('token-save').addEventListener('click', async () => {
+    const t = $('token-input').value.trim();
+    if (!t) return;
+    setToken(t);
+    $('token-input').value = '';
+    $('setup-status').textContent = 'Verifying…';
+    await start();
+  });
+  $('logout').addEventListener('click', () => {
+    if (!confirm('Sign out and remove the saved token from this browser?')) return;
+    clearToken();
+    location.reload();
+  });
+  $('new-post').addEventListener('click', openEditor);
+  $('refresh-list').addEventListener('click', refreshPosts);
+  $('cancel').addEventListener('click', closeEditor);
+  $('save-draft').addEventListener('click', () => {
+    saveDraft();
+    $('edit-status').textContent = 'Draft saved locally.';
+    setTimeout(() => $('edit-status').textContent = '', 2500);
+  });
+  $('publish').addEventListener('click', async () => {
+    const title = $('title').value.trim();
+    const date  = $('date').value;
+    const tags  = $('tags').value.trim();
+    const body  = $('body').value;
+    if (!title) { setStatus('Title is required.', 'err'); return; }
+    if (!date)  { setStatus('Date is required.', 'err'); return; }
+    if (!body.trim()) { setStatus('Body is empty.', 'err'); return; }
+
+    $('publish').disabled = true;
+    $('edit-status').textContent = 'Publishing…';
+    try {
+      const res = await publishPost({ title, date, tags, body });
+      clearDraft();
+      $('title').value = ''; $('tags').value = ''; $('body').value = '';
+      updatePreview();
+      closeEditor();
+      setStatus(`Published! The site will rebuild in ~1 min. Commit: ${res.commit.sha.slice(0,7)}`, 'ok');
+      refreshPosts();
+    } catch (e) {
+      setStatus(String(e), 'err');
+    } finally {
+      $('publish').disabled = false;
+      $('edit-status').textContent = '';
+    }
+  });
+  $('body').addEventListener('input', updatePreview);
+  $('title').addEventListener('input', saveDraft);
+  $('date').addEventListener('input', saveDraft);
+  $('tags').addEventListener('input', saveDraft);
+
+  start();
+})();
+</script>
 </body>
 </html>
