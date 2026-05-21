@@ -93,18 +93,6 @@ a {
   }
 }
 
-// Admin link — styled as a distinct pill button
-.greedy-nav .visible-links a[href="/admin/"] {
-  color: #e6edf3 !important;
-  background: var(--accent-dark);
-  border-radius: 6px;
-  padding: 0.3rem 0.85rem !important;
-  font-size: 0.82rem;
-  font-weight: 600;
-  margin-left: 0.5rem;
-  &:hover { background: #388bfd !important; color: #fff !important; }
-}
-
 // ---- Post cards ----
 .list__item {
   padding: 1.4rem 1.6rem;
