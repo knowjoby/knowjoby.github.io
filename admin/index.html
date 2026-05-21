@@ -83,6 +83,32 @@
     font-family: ui-monospace, monospace; font-size: 13px;
   }
   .hidden { display: none !important; }
+  .login-card {
+    max-width: 420px; margin: 80px auto; text-align: center;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 40px 36px;
+  }
+  .login-card h2 { margin: 0 0 8px; font-size: 20px; }
+  .login-card p  { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+  .btn-github {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #fff; color: #1a1a1a;
+    border: 0; padding: 11px 22px; border-radius: 8px;
+    font-weight: 600; font-size: 15px; cursor: pointer;
+    text-decoration: none; transition: background 0.15s;
+  }
+  .btn-github:hover { background: #e8ecf0; }
+  .btn-github svg  { flex-shrink: 0; }
+  details.pat-fallback { margin-top: 28px; text-align: left; }
+  details.pat-fallback summary {
+    color: var(--muted); font-size: 12px; cursor: pointer;
+    user-select: none; list-style: none;
+  }
+  details.pat-fallback summary::after { content: ' ▸'; }
+  details.pat-fallback[open] summary::after { content: ' ▾'; }
+  details.pat-fallback .inner { margin-top: 14px; }
+  details.pat-fallback input { font-size: 13px; padding: 8px 10px; }
+  details.pat-fallback button { font-size: 13px; padding: 8px 14px; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -97,25 +123,26 @@
 
 <main>
 
-  <!-- Setup view (first time) -->
-  <section id="setup-view" class="hidden">
-    <div class="card">
-      <h2 style="margin-top:0">First-time setup</h2>
-      <p>This admin commits posts directly to your GitHub repo using a Personal Access Token. The token lives only in this browser (<code>localStorage</code>), never on a server.</p>
-      <ol>
-        <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → Fine-grained tokens → New</a>.</li>
-        <li><b>Token name:</b> <code class="kbd">knowjoby blog admin</code></li>
-        <li><b>Expiration:</b> pick what you like (e.g. 90 days).</li>
-        <li><b>Repository access:</b> "Only select repositories" → pick <code class="kbd">knowjoby/knowjoby.github.io</code>.</li>
-        <li><b>Repository permissions:</b> set <b>Contents</b> to <b>Read and write</b>. (That's the only permission you need.)</li>
-        <li>Generate the token, copy it (starts with <code>github_pat_…</code>), and paste below.</li>
-      </ol>
-      <label for="token-input">Paste token</label>
-      <input id="token-input" type="password" placeholder="github_pat_… or ghp_…" autocomplete="off" spellcheck="false" />
-      <div class="toolbar">
-        <button id="token-save">Save &amp; sign in</button>
-        <span id="setup-status" class="muted" style="font-size:13px"></span>
-      </div>
+  <!-- Login view -->
+  <section id="login-view" class="hidden">
+    <div class="login-card">
+      <h2>knowjoby · admin</h2>
+      <p>Sign in with your GitHub account to manage posts.</p>
+      <a id="github-login-btn" href="#" class="btn-github">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        Login with GitHub
+      </a>
+
+      <details class="pat-fallback">
+        <summary>Use a Personal Access Token instead</summary>
+        <div class="inner">
+          <input id="token-input" type="password" placeholder="github_pat_… or ghp_…" autocomplete="off" spellcheck="false" />
+          <button id="token-save">Sign in with token</button>
+          <div id="setup-status" style="font-size:12px; color:var(--danger); margin-top:6px"></div>
+        </div>
+      </details>
     </div>
   </section>
 
@@ -176,11 +203,12 @@
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
 <script>
 (() => {
-  const OWNER = 'knowjoby';
-  const REPO  = 'knowjoby.github.io';
-  const BRANCH = 'main';
-  const TOKEN_KEY = 'kjb_admin_token';
-  const DRAFT_KEY = 'kjb_admin_draft';
+  const OWNER      = 'knowjoby';
+  const REPO       = 'knowjoby.github.io';
+  const BRANCH     = 'main';
+  const TOKEN_KEY  = 'kjb_admin_token';
+  const DRAFT_KEY  = 'kjb_admin_draft';
+  const WORKER_URL = 'https://kjb-oauth.jobby-john.workers.dev';
 
   // --- helpers ---
   const $ = (id) => document.getElementById(id);
@@ -368,27 +396,38 @@
   }
 
   // --- Auth bootstrap ---
-  async function start() {
-    const token = getToken();
-    if (!token) {
-      show($('setup-view'));
-      hide($('app-view'));
-      return;
+  async function showLogin(msg) {
+    // Set the OAuth button href to the live worker
+    $('github-login-btn').href = WORKER_URL + '/auth';
+    hide($('app-view'));
+    show($('login-view'));
+    if (msg) {
+      $('setup-status').textContent = msg;
     }
+  }
+
+  async function start() {
+    // 1. Check if returning from OAuth (token in URL hash)
+    const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const hashToken = hash.get('token');
+    if (hashToken) {
+      setToken(hashToken);
+      history.replaceState(null, '', location.pathname); // clear hash from URL
+    }
+
+    const token = getToken();
+    if (!token) { showLogin(); return; }
+
     try {
       const user = await fetchUser();
       $('whoami').textContent = `signed in as ${user.login}`;
       show($('logout'));
-      hide($('setup-view'));
+      hide($('login-view'));
       show($('app-view'));
       refreshPosts();
     } catch (e) {
-      // Bad token — go back to setup
       clearToken();
-      $('setup-status').textContent = 'That token didn\'t work. Please try again.';
-      $('setup-status').className = 'status err';
-      show($('setup-view'));
-      hide($('app-view'));
+      showLogin('Session expired — please sign in again.');
     }
   }
 
