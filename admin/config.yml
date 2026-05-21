@@ -7,7 +7,8 @@ backend:
   branch: main
   # Points at your Netlify OAuth proxy site.
   # Replace AFTER you create the Netlify site (see README "OAuth proxy" section).
-  base_url: https://knowjoby-blog-auth.netlify.app
+  base_url: https://api.netlify.com
+  site_id: ca8a03d9-8084-4be1-9550-e3b884dc77f1
   auth_endpoint: auth
 
 # Where uploaded images go
