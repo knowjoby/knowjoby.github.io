@@ -1,0 +1,258 @@
+---
+# Only the main Sass file needs front matter
+---
+
+@charset "utf-8";
+
+@import "minimal-mistakes/skins/dark";
+@import "minimal-mistakes";
+
+// ============================================================
+// CUSTOM DESIGN — GitHub-dark inspired, modern & minimal
+// ============================================================
+
+:root {
+  --bg-primary:    #0d1117;
+  --bg-secondary:  #161b22;
+  --bg-card:       #161b22;
+  --border:        #30363d;
+  --text-primary:  #c9d1d9;
+  --text-muted:    #8b949e;
+  --accent:        #58a6ff;
+  --accent-dark:   #1f6feb;
+  --code-bg:       #1e2530;
+  --radius:        8px;
+}
+
+// ---- Base ----
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+html { scroll-behavior: smooth; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: #e6edf3;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s ease;
+  &:hover { color: #79c0ff; text-decoration: none; }
+}
+
+::selection { background: rgba(88,166,255,0.25); color: #e6edf3; }
+
+// ---- Masthead ----
+.masthead {
+  background-color: rgba(13,17,23,0.97);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  &__inner-wrap { padding: 0.7rem 1.5rem; }
+}
+
+.site-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: #e6edf3 !important;
+  &:hover { color: var(--accent) !important; }
+}
+
+// ---- Nav ----
+.greedy-nav {
+  background: transparent;
+
+  a {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+    &:hover { color: #e6edf3; background: rgba(255,255,255,0.06); }
+    &::before { display: none !important; } // remove MM underline animation
+  }
+
+  button {
+    background: transparent;
+    color: var(--text-muted);
+    &:hover { background: rgba(255,255,255,0.06); }
+  }
+}
+
+// Admin link — styled as a distinct pill button
+.greedy-nav .visible-links a[href="/admin/"] {
+  color: #e6edf3 !important;
+  background: var(--accent-dark);
+  border-radius: 6px;
+  padding: 0.3rem 0.85rem !important;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  &:hover { background: #388bfd !important; color: #fff !important; }
+}
+
+// ---- Post cards ----
+.list__item {
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+  }
+
+  .archive__item-title {
+    margin-top: 0;
+    font-size: 1.08rem;
+    a {
+      color: #e6edf3;
+      &:hover { color: var(--accent); }
+    }
+  }
+
+  .archive__item-excerpt {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    margin-bottom: 0;
+  }
+
+  .page__meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+}
+
+.archive__subtitle {
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+}
+
+// ---- Sidebar / author ----
+.sidebar {
+  .author__name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e6edf3;
+    letter-spacing: -0.02em;
+  }
+  .author__bio {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .author__avatar img {
+    border-radius: 50%;
+    border: 2px solid var(--border);
+  }
+  .author__urls-wrapper button {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-color: var(--border);
+    border-radius: 6px;
+    &:hover { background: rgba(255,255,255,0.06); color: #e6edf3; }
+  }
+  .author__urls {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    a { font-size: 0.85rem; color: var(--text-muted); &:hover { color: var(--accent); } }
+  }
+}
+
+// ---- Page content ----
+.page__content {
+  font-size: 1rem;
+  line-height: 1.78;
+  p { color: var(--text-primary); }
+}
+
+.page__meta { font-size: 0.8rem; color: var(--text-muted); }
+
+// ---- Tags / categories ----
+.page__tags a, .page__categories a {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.15em 0.7em;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  &:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+}
+
+// ---- Code ----
+code, pre {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.88em;
+}
+
+pre {
+  background: var(--code-bg) !important;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+
+code.highlighter-rouge {
+  background: var(--code-bg);
+  color: #f0883e;
+  border: 1px solid rgba(240,136,62,0.2);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+}
+
+// ---- Footer ----
+.page__footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  footer { color: var(--text-muted); font-size: 0.8rem; }
+  a { color: var(--text-muted); &:hover { color: var(--accent); } }
+}
+
+// ---- Search ----
+.search-toggle { color: var(--text-muted); &:hover { color: #e6edf3; } }
+
+// ---- Pagination ----
+.pagination {
+  border-top: 1px solid var(--border);
+  a {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    &:hover { background: var(--bg-card); color: var(--accent); border-color: var(--accent); }
+  }
+}
+
+// ---- Scrollbar (webkit) ----
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+  &:hover { background: #484f58; }
+}
