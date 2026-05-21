@@ -29,6 +29,7 @@ content:
         label: Content
         type: rich-text
         options:
+          height: 800
           toolbar:
             - bold
             - italic
