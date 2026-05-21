@@ -14,7 +14,7 @@ content:
         label: Date
         type: date
         options:
-          format: "YYYY-MM-DD 00:00:00 +0000"
+          format: "yyyy-MM-dd 00:00:00 +0000"
           time: false
       - name: excerpt
         label: Excerpt
